@@ -5,6 +5,15 @@
 
 use Data::Dumper;
 
+# what is the "previous baseline" tag
+$base_tag = 'v19.08.1';
+
+# the branch where we are making the release
+$base_branch = 'stable/1908';
+
+# the release for which we are making the release notes
+$release_version = '19.08.2';
+
 
 # make string ready to be used for RELEASE.md
 sub mdstring {
@@ -155,23 +164,90 @@ sub print_markdown {
 	}
 }
 
-sub print_components_header {
-	my $a = <<__E__;
-@page release_notes_2001 Release notes for VPP 20.01
+sub get_api_changes {
+	my $base_tag_branch = "$base_branch-api-baseline";
+	$base_tag_branch =~ s/\//-/g;
+	`git branch -d $base_tag_branch`;
+	`git checkout -b $base_tag_branch $base_tag`;
+	`make build`;
+	`sudo ./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on save-api-table api-table.$base_tag_branch } unix { cli-listen /run/vpp/api-cli.sock }`;
+	system('sudo kill $(ps -ef | grep \'/run/vpp/api-cli.sock\' | grep -v grep | awk \'{ print $2; }\')');
+	`git checkout $base_branch`;
+	`git branch -d $base_tag_branch`;
+	`make build`;
 
-More than 1039 commits since the 19.08 release.
+	`sudo ./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on } unix { cli-listen /run/vpp/api-cli.sock }`;
+	sleep(30);
+	$api_changes = `sudo ./build-root/install-vpp_debug-native/vpp/bin/vppctl -s /run/vpp/api-cli.sock show api dump file /tmp/api-table.$base_tag_branch compare`;
+	system('sudo kill $(ps -ef | grep \'/run/vpp/api-cli.sock\' | grep -v grep | awk \'{ print $2; }\')');
+
+	return($api_changes);
+}
+
+sub print_release_note {
+
+	my $api_changes = get_api_changes();
+	my $page_id = "release_notes_$release_version";
+	$page_id =~ s/\.//g;
+
+	my $the_header = <<__E__;
+\@page $page_id Release notes for VPP $release_version
+
+The $release_version is an LTS release. It contains numerous fixes,
+as well as new features and API additions.
 
 ## Features
 
 __E__
+        print($the_header);
+
+	my $components = read_maintainers();
+	my $commits = collect_commits("git log --oneline --reverse --decorate=no --grep 'Type: feature' $base_tag..$base_branch");
+	# my $commits = collect_commits("git log --oneline --reverse --decorate=no --grep 'VPP-' v19.08.1..stable/1908");
+
+	print_markdown($components, $commits);
+
+	my $api_changes_header = <<__E__;
+
+## API changes
+
+Description of results:
+
+* _Definition changed_: indicates that the API file was modified between releases.
+* _Only in image_: indicates the API is new for this release.
+* _Only in file_: indicates the API has been removed in this release.
+
+__E__
+
+	print($api_changes_header);
+	print("$api_changes\n");
+	my $trailer = <<__E__;
+
+## Fixed issues
+
+For the full list of fixed issues please refer to:
+- fd.io [JIRA](https://jira.fd.io)
+- git [commit log](https://git.fd.io/vpp/log/?h=$base_branch)
+
+__E__
+
+	print($trailer);
 
 }
 
-my $components = read_maintainers();
-my $commits = collect_commits("git log --oneline --reverse --decorate=no --grep 'Type: feature' v19.08.1..stable/1908");
-# my $commits = collect_commits("git log --oneline --reverse --decorate=no --grep 'VPP-' v19.08.1..stable/1908");
+#
+# FIXME: generate the data as a string rather than printing it.
+#
+# And commit
+#
+#    git commit -a -s --amend -m "misc: 19.08.2 Release Notes
+#
+# Type: docs
+# "
 
-# print Dumper($commits);
-print_markdown($components, $commits);
+
+
+print_release_note();
+
 
 
