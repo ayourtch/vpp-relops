@@ -1,0 +1,107 @@
+#!/usr/bin/perl
+#
+#
+# A custom git merge driver for automatic merging of the 
+# release notes patches older branch dot-releases - it
+# should resolve am otherwise annoying conflict that
+# arises if you e.g. cherrypick a 19.08.2 RELEASE.md patch
+# into stable/2001 or master
+#
+# To enable it, add the directory where this script
+# is into the path, and then edit the .git/config
+# to add:
+#
+# [merge "release-md"]
+#        name = "VPP RELEASE.md merge driver"
+#        driver = git-merge-release-md %O %A %B
+#
+# Also, add the following to .gitattributes:
+#
+# RELEASE.md merge=release-md
+#
+# The driver assumes all the diffs between the "old" and "B" revisions
+# (the one we are cherry-picking) are additions, as are all of
+# the release notes patches.
+# 
+
+use File::Temp qw/ tempfile tempdir /;
+
+my $rev_old = $ARGV[0];
+my $rev_a = $ARGV[1];
+my $rev_b = $ARGV[2];
+
+print("Old: $rev_old, A: $rev_a, B: $rev_b\n");
+$diff_b_output = `diff -c $rev_old $rev_b`;
+
+$diff_hunks = {};
+$diff_hunks_used = {};
+
+$in_hunk = 0;
+$hunk_data = '';
+$hunk_trigger = '';
+
+# extract each (additive) hunk and its corresponding "trigger" (line that immediately follows that has content)
+
+foreach $aLine (split(/[\r\n]+/, $diff_b_output)) {
+	# print("LINE: $aLine\n");
+	if ($aLine =~ /^\*\*\*/) {
+		# print("+++ ASTERISK\n");
+	} elsif ($aLine =~ /^---/) {
+		# print("+++ MINUS\n");
+	} elsif ($aLine =~ /^\+\ (.*)$/) {
+		my $data = $1;
+		$in_hunk = 1;
+		$hunk_data = "$hunk_data$data\n";
+		# print("+++ DATA\n");
+	} elsif ($aLine =~ /^  (.+)$/) {
+		if ($in_hunk) {
+			$hunk_trigger = $1;
+			$diff_hunks->{$hunk_trigger} = $hunk_data;
+			# print("+++ TRIGGER\n");
+			# reset the state
+			$in_hunk = 0;
+			$hunk_data = "";
+		} else {
+			# print("+++ SKIP\n");
+		}
+	} elsif ($aLine =~ /^  (.*)$/) {
+		# other anchor lines (including the empty ones)
+		# print("+++ SKIP-EMPTY\n");
+	} else {
+		die ("Unexpected text or state");
+	}
+}
+
+# now open a tempfile for writing and attempt to add the hunks from B into content from A,
+# triggered by the "trigger lines".
+# It's a very simplistic strategy, but works for the release notes merging,
+# because the changes are fairly predictable.
+#
+open(FILE_A, "<$rev_a") or die("Could not open $rev_a for reading");
+($tmp_fh, $tmp_filename) = tempfile(".release-md-merge-XXXXXX");
+# print ("temporary file name: $tmp_filename\n");
+
+while($aLine = <FILE_A>) {
+	chomp($aLine);
+	if (exists($diff_hunks->{$aLine})) {
+		print $tmp_fh $diff_hunks->{$aLine};
+		$diff_hunks_used->{$aLine} = 1;
+	}
+	print $tmp_fh "$aLine\n";
+}
+close(FILE_A);
+close($tmp_fh);
+
+# check that we had "used" all of the hunks
+
+foreach $aTrigger (keys %{$diff_hunks}) {
+	if (!exists($diff_hunks_used->{$aTrigger})) {
+		die ("Unused diff hunk with trigger '$aTrigger'");
+	}
+}
+
+rename $tmp_filename, $rev_a;
+
+# all good!
+exit(0);
+
