@@ -6,6 +6,13 @@ TMPDIR=$(mktemp -d /tmp/vpp-crccheck-test-XXXXX)
 CURR_ROOT=$(git rev-parse --show-toplevel)
 CURR_DIR=$(pwd)
 
+verify_check_patchset_fails() {
+	if (extras/scripts/crcchecker.py --check-patchset); then
+		echo "ERROR - check succeeded, it should have failed!"
+		exit 1;
+	fi
+}
+
 # make a copy of the current repo that we can play with
 cd ${TMPDIR}
 mkdir misc-files
@@ -15,16 +22,29 @@ cd vpp-uut
 # grab the CRC checker
 git fetch "https://gerrit.fd.io/r/vpp" refs/changes/81/26881/10 && git cherry-pick FETCH_HEAD
 
-echo "Check the current patchset..."
+echo "TEST: Check the current patchset..."
 extras/scripts/crcchecker.py --check-patchset
 
-echo "Dumping the current manifest..."
+echo "TEST: Dumping the current manifest..."
 extras/scripts/crcchecker.py --dump-manifest >${TMPDIR}/misc-files/manifest.txt
 
-echo "Checking the 20.01 version of acl.api...."
+echo "TEST: Checking the 20.01 version of acl.api...."
 extras/scripts/crcchecker.py --git-revision v20.01 src/plugins/acl/acl.api
 
-echo "All tests done, cleaning up."
+echo "TEST: Add a new field into a message in acl.api, and check patchset - must fail..."
+sed -i -e 's#vpe_pid;#vpe_pid; u32 sneaky_new_field;#' src/plugins/acl/acl.api
+verify_check_patchset_fails
+
+echo "TEST: Rename the changed acl.api file and not it to git... must fail (due to deletion of the APIs)..."
+mv src/plugins/acl/acl.api src/plugins/acl/acl_new.api
+verify_check_patchset_fails
+
+echo "TEST: Add the renamed file to git commit... must fail (due to addition of the fields)..."
+git add src/plugins/acl/acl_new.api
+verify_check_patchset_fails
+
+
+echo "TEST: All tests got the expected result, cleaning up."
 
 # done with all the tests - clean up
 cd ${CURR_DIR}
