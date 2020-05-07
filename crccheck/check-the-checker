@@ -1,0 +1,35 @@
+#!/bin/sh
+set -eux
+
+TMPDIR=$(mktemp -d /tmp/vpp-crccheck-test-XXXXX)
+
+CURR_ROOT=$(git rev-parse --show-toplevel)
+CURR_DIR=$(pwd)
+
+# make a copy of the current repo that we can play with
+cd ${TMPDIR}
+mkdir misc-files
+git clone ${CURR_ROOT} vpp-uut
+cd vpp-uut
+
+# grab the CRC checker
+git fetch "https://gerrit.fd.io/r/vpp" refs/changes/81/26881/10 && git cherry-pick FETCH_HEAD
+
+echo "Check the current patchset..."
+extras/scripts/crcchecker.py --check-patchset
+
+echo "Dumping the current manifest..."
+extras/scripts/crcchecker.py --dump-manifest >${TMPDIR}/misc-files/manifest.txt
+
+echo "Checking the 20.01 version of acl.api...."
+extras/scripts/crcchecker.py --git-revision v20.01 src/plugins/acl/acl.api
+
+echo "All tests done, cleaning up."
+
+# done with all the tests - clean up
+cd ${CURR_DIR}
+
+# beware of empty variables, careful with deletion
+rm -rf ${TMPDIR}/vpp-uut
+rm -rf ${TMPDIR}/misc-files
+rmdir ${TMPDIR}
