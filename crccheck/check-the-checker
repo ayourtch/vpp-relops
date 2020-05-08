@@ -28,7 +28,7 @@ git clone ${CURR_ROOT} vpp-uut
 cd vpp-uut
 
 # maybe grab the CRC checker
-# git fetch "https://gerrit.fd.io/r/vpp" refs/changes/81/26881/14 && git cherry-pick FETCH_HEAD || echo "Already there"
+# git fetch "https://gerrit.fd.io/r/vpp" refs/changes/81/26881/15 && git cherry-pick FETCH_HEAD || echo "Already there"
 
 
 echo "TEST 1: Check the current patchset..."
@@ -128,6 +128,12 @@ verify_check_patchset_fails
 
 # get rid of the "erroneous" commit in the previous test
 git reset --hard HEAD~1
+
+sed -i -e 's#bool foo;#option status="in_progress";bool foo;#' crccheck.api
+echo "TEST14: Verify we fail if a production message becomes 'in-progress'"
+git add crccheck.api
+git commit -m "make the production message in-progress";
+verify_check_patchset_fails
 
 echo "TEST: All tests got the expected result, cleaning up."
 
