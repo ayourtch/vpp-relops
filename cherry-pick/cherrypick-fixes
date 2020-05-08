@@ -1,0 +1,12 @@
+#!/bin/sh
+mount | grep build-root | awk '{ print $3; }' | xargs -n 1 sudo umount
+# git reset --hard v20.05-rc0
+git clean -fdx
+
+for DIR in .ccache build-vpp_debug-native install-vpp_debug-native; do
+  mkdir -p build-root/${DIR} && sudo mount -t tmpfs tmpfs build-root/${DIR}
+  sudo chown $(whoami) build-root/${DIR}
+done
+cat ../all-fixes-post-2001 | perl ../apply-all-cherrypicks.pl | tee -a ../result-cherrypick-fixes.txt
+
+

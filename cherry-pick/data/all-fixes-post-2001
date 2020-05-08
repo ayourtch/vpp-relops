@@ -1,0 +1,353 @@
+c171d01cd build: Add missing version.h dependency in vnet
+f0bae64f6 vppinfra: fixing compilation issues in 32-bit
+de7fcacb3 tcp: fix listen node coverity warning
+ff2fad170 udp: fix ipv6 listen port registration
+6e3c1f8ec vcl: add rx event on epoll ctl if needed
+56cef059e tcp: fix rxt delivered without sacks
+a420c5e6c gso: fix typo in the quad-loop
+1bf83b9d9 misc: binary-api sw_interface_vhost_user_dump is broken
+13e6fce7c sr: some fixes for SRv6 CLI/API
+db43bb6af lb: fix that lb_add_del_vip and lb_add_del_as api doesn't work correctly
+cd681adab classify: fix pcap filter set init
+2b4e74014 nat: removed obsolete fragmentation code
+54eda4bcb nat: fix dhcp client on outside interface with output feature
+c0c4eec3b nsim: enable output scheduling on main thread
+da5dedfe3 fib: FIB crash removing labelled route (VPP-1818)
+f5c7305c4 hsa: proxy app fixes
+66300f6ab fib: Adjacency realloc during rewrite update walk (VPP-1822)
+7ec120e8d ipsec: re-enable DPDK IPSec for tunnel decap/encap (VPP-1823)
+f66f88383 api: mark api_trace_command_fn thread-safe
+221b3839b srv6-mobile: fix the converity issue
+ddb90a063 vcl: always report EPOLLHUP/EPOLLRDHUP on close
+2d8829cbb session: fix node runtime in pre-input queue handler
+5ecc1e4d4 devices: vhost: fix data offset on input
+37157d527 fib: Reload the adj after possible realloc (VPP-1822)
+6f090fa1f libmemif: memif_control_fd_update always pass context from libmemif_main
+4d39f9c61 bfd: reset peer discriminator on timeout
+3b37125bd map: api: fix tag overflow and leak
+03328ec8b interface: Add missing ip4 udp->checksum = 0 prior to computing checksum
+196fce2b6 classify: pcap / packet trace debug CLI bugs
+12e3e312b vppinfra: use CPUID provided base frequency if available
+bd5c49a16 sr: fix possible null-pointer dereference
+0d4a61216 map: ip4-map-t more RFC compliant
+30928f87a session tcp: fix packet tracing
+f31acfafb dhcp: disable extraneous vlib_log spew
+27d12d30c bfd: add missing cast
+56817e2c4 map: handle ip4 ttl=1 packets in map-t
+65866f03d map: Prevent IPv4 prefix spoofing during IPv6 -> IPv4
+3039753ed tap: fix the host mac address
+91592c0c9 tap: fix host mtu configuration setting
+c25048bd0 vppinfra: improve clocks_per_second convergence
+36a0c4d65 session: fix chunk batch alloc for large fifos
+8ab4e507c gre: add missing .api edits
+3d5f6229b fib: refresh adj pointer after fib_walk_sync due to possible realloc
+174959cd9 fib: invalid check for adj types.
+564e16729 virtio: vhost gso is broken in some topology
+0f9667368 vppinfra: fix typo in tw_timer_template.c
+8af24b145 ip: translate fragmented icmp to fragmented icmp6
+0860b2e19 dpdk: patch ixgbe driver to solve race condition
+59b6c0c86 vppapigen: fix options representation
+9fbacbc56 nat: pool allocation function fix
+541406241 vcl: switch to closed state after app close
+51cabf2a1 vppinfra: deal with 0 return from os_cpu_clock_frequency()
+90430b6e0 ipsec: set l2_len for GRE-TEB tunnel decap
+a488f3755 api:  fix vl_api_clnt_node process stack overflow
+72e31bc2d stats: fix state counter removal
+707b5369f quic: fix coverity warning
+190dc1f67 vcl: fix session closing error
+b71ef86c7 hsa: proxy wnd update only if enough space is available
+1557d9a30  misc: address sanitizer: fix vm instrumentation
+9fef68d77 quic: fix coverity warning
+dc90c719b svm: use default SVM address in fifo unit tests
+6e6ad64a4 tests: support python 3.8
+84382ae45 fib: fix non-NULL terminated vectors in cli output
+3ce03520a quic: update config values for large stream tests
+97677a26f ip6: fix l4 checksum with hop-by-hop header
+f267d1147 ip-neighbor: fix MLD reports not being sent
+b954f0125 sctp: API cleanup
+f617b145e vlib: properly configure main thread's core id
+f1ecb6555 ipsec: fix AES-GCM block size
+deb6f784e tcp: fix input error counters
+4a06846dd vlib: Skip core 0 if workers are configured.
+fa2a31666 ip: fix ip-local errors
+30e7671c8 sr: update NH value for Ethernet payloads
+90d28846f vppinfra: remove unused variable from timing wheel
+16d974ec5 session: avoid scanning new io list under load
+bdfa4d378 crypto-native: fix ARM compilatiion flags
+a6ef36b2c misc: fix coverity warnings
+aba4983ad api: do not truncate api dump file size
+4dc10a4d5 tcp: improve invalid packet handling in syn-rcvd
+104112f2d classify: fix "show classify filter" debug CLI
+6ede57025 fib: Fix some more realloc errors
+adcfb15fa vcl: handle close after reset
+e88845e4f vcl: clear accept msg flags
+3be33f17e nsim: fix quad-loop packet trace
+cd120f9bb dpdk: fix flow(with mark action) deletion crash issue
+ac8bb9263 dpdk: TSO does not work for Cisco VIC
+a357a9380 vrrp dns: fix coverity warnings
+067f9544d vcl: fix ldp read on closing session
+985d9293a tls: remove session lookup operation in TLS
+9f32b6aca tap: fix the default parameter for num_rx_queues
+2d59f59fb tls: Fix Picotls ctx_read rx_content issue
+4fbb9daa9 vlib: fix code of getting numa node with specific cpu_id
+47d41ad62 misc: fix coverity warnings
+e5ecf3ea4 rdma: fix bug related to ring buffer
+4339c3615 vppinfra: fix debug image builds on arm
+ffd15463b misc: fix coverity warnings
+3fccd0278 vrrp: do not define _details as autoreply
+837826169 tls: handle disconect and reset in async mode
+96acc9b04 tcp: fix syn-sent reset
+ac267dd41 tls: need to use thread id to fetch the event
+a434955b3 fib: fib path realloc during midchain stack
+d3884202a ikev2: fix logging init
+8a10c7351 nat: avoid running pointless session cleanups
+b728a3c8b map: honor icmp6-unreachables param in map-t
+f145c1563 map: honor pre-resolve param in map-t
+1284f8c71 ip-neighbor: Fix aging timeout
+3ebebc3a2 fib: adjacency midchain teardown (VPP-1841)
+f58571ee6 hsa: cleanup vpp_echo JSON output
+6ce954f8e lisp: fix coverity warnings
+62a7fe289 tcp: fix coverity warning in bt
+269549491 vrrp: fix coverity errors
+d1586962a dhcp: update secondary radv_info structures
+39a233a0a ip: Unintialized variables in prefx setup (coverity warning)
+d057625d4 ipip: Unintialized return variable (coverity warning)
+ea96e9236 fib: Uninitialised pad in the prefix (coverity warning)
+e9a630a52 gbp: Coverity warnings for unitialized variables
+b05249b3b ikev2: cleanup tunnels after subsequent sa-init
+487507f40 tcp: remove useless prediction
+2e9a06fa6 crypto-native: do not overwrite data after partial tag
+c8e19cba7 ikev2: proper cleanup of SAs during rekey
+6e495ce42 vppinfra: correct fixed pool header size calculation
+41e831f55 crypto-openssl: fix coverity warnings
+719ef39d9 crypto: fix coverity warnings
+2da39718f unittest: Skip string test case for sizeof (src) > sizeof (dst)
+f7ab7b2d9 avf: Handle chain buffer in TX properly
+2dbee9361 api: improve api string safety
+908965db7 span: API cleanup
+00ec4019b sr: API cleanup
+db86329ab pg: API cleanup
+1c684f9af lldp: API cleanup
+666ece35c ipsec: API cleanup
+7d4cd0cf6 map: handle IPv6 extension headers for TCP/UDP
+31b9a59cb tls: fix picotls dbg
+aab0604c4 tls session: fix unlisten
+3017af9ab tls: fix bulk bio read/write
+d26b8607c crypto: fix set crypto handlers
+23a386b71 vat: add ip api types parser definitions
+551775eaa lb: Fix generating illegal key in per-port vip
+eec5d4804 vppapigen: list imports in JSON
+8c79a4ebb svm: fix coverity warnings
+2fcd265d3 ipsec: Revert API cleanup
+7249b90ab ip-neighbor: fix ip6_ra_cmd
+fe7b8c2b4 ikev2: fix incorrect reply messages
+bdfdc4a48 vrrp: fix api-related coverity warnings
+952ec0e0a ebuild: fix the distclean target
+c75ce4dff svm: fix slice locking on fifo alloc
+516e4ed66 virtio: fix the coverity warning
+297d288ed ip: fix coverity warning
+1c2002a31 vxlan: vxlan-gpe/vxlan-gpe.cpi API cleanup
+567e562a9 lldp: coverity fix, uninitialized array
+925113111 map: fix map port calculation for ICMP
+ea2abbaea vppapigen: crc is a negative value for some messages when using python 2.7
+5893747d7 api: ipsec: add missing IS_INBOUND flag.
+b4e5e50fe session: API cleanup
+75ccf7b5c session: fix segment search on fifo alloc
+79437c8db fib: path flag FIB_API_PATH_TYPE_INTERFACE_RX not copied to client
+724c8051d build: building applications outside of vpp is missing header files
+d8da60d05 session: fix session reschedule condition
+1d94ab5f1 misc: Fix vpp-selinux-policy dependency on CentOS 8
+311817f77 vcl: fix coverity warning
+fa9584246 vppinfra: fix 32-bit overflow in os_cpu_clock_frequency
+145e330f0 l2: API cleanup
+49a11cff8 udp: fix UDP socket byte order in lookup
+3d9f134e7 vppinfra: fix corner cases in tw_timer_expire
+287d5e109 ipsec: API cleanup
+a53068905 lb: fix coverity warning
+7aef80b21 build: add libssl-dev for ubuntu 16.04 and 18.04
+b55aec1c8 docs: doxygen fix siphon under python3
+66441c4c6 vppinfra: improve timebase resilience
+9f4db3cdd tcp: protect against forced cleanups
+f52420d50 ikev2: fix udp encap
+cd01fb423 policer: API cleanup
+ce266ad57 vlib: fix unix cli SIGSEGV for empty line input
+30fa5d1e1 vrrp: unit tests do not run by default
+7a91b0e26 vppinfra: remove time jump workaround
+c27b43673 dpdk-ipsec: Fix for multipoint IPSEC
+7e86947d7 devices: netlink create the object if missing
+2b2a40cf3 sr: SRv6 coverity
+dd9aedaf3 nat: in2out/out2in handoff node index bugfix
+cd5a4a035 map: fix translation of icmp4 error messages
+7c0eb56f4 vxlan: vxlan/vxlan.api API cleanup
+6ca2ac3f8 arp: Restore CLI for setting ARP proxy entries
+933fcf489 api: API cleanup
+684498507 ipsec: initialize algs to none in 'create ipsec tunnel' cli
+b0f956c25 pg: update packet generator test scripts
+6a32ce326 ethernet: Copy only 6 bytes of mac address into a u64
+7dd63e5cc ip: change ip API enums address_family and ip_proto size to u8
+7fd59cc79 tcp: count dupacks with no sacks
+f872e9e99 ip: ip API types coverity fix
+62ad2aaff ip: provide extern declaration for ip punt nodes
+76c6159d8 vlib: fix error when creating avf interface on SMP system
+7f6d145ac virtio: fix the out of order descriptors in tx
+529f0e97b virtio: fix link up/down flag
+2d8228182 ikev2: fix l2 interface
+18a4a3716 vlib: complain if workers are configured twice
+77a95cdce libmemif: don't consume rx queue interrupt, if memif_rx_burst fails
+7a6f5a4fe ipsec: efficient layout of ESP per thread data
+0d90ed92c srv6-mobile: Fix the localsid length issue on vnet/srv6
+6e6968f06 vppinfra: fix typo in dlmalloc.c
+1690dcb49 dpdk: false link down issue with ixgbe NIC
+547a61654 tap: fix the numa/queue for buffers
+b232d192f virtio: vhost gso checksum error when both indirect and mrg_rxbuf are off
+c2c1bfd9b ipsec: fix chained ESP
+0938eba15 sr: srv6 API cleanup
+c33c0ec96 srv6-mobile: Fix the coverity issues
+ae8102ec0 ipsec: Revert "ipsec: fix chained ESP"
+1839fe165 avf: proper promisc handling
+46d0ff394 map: fix translation of icmp6 error messages
+eda1b8c32 vcl: fix ldp writev 0 vecs
+2a6642e95 vcl: fix ldp recv return on error
+753b96f31 quic: disable vnet_crypto and batching if no crypto engines are loaded
+b1bd8760c map: fix hop limit expiration at br
+4cfb0bf1b nat: fix error counters
+e7f719038 avf: fix rx queue refill on buffer alloc failure
+31d6c738c ip: Adding IP tables is no MP safe
+138676b60 ikev2: fix gcm in ike protocol
+336eac84e ikev2: fix wrong usage of BN_bn2bin()
+4897d77c6 session: fix coverity warning
+aad1ee149 acl: API cleanup
+492a5d0bd acl: revert acl: api cleanup
+2f8cd9145 acl: API cleanup
+1f16205e5 build tests: fix 'test-wipe-papi' target
+7654a7186 interface: remove mtu clib_warning message from api handler
+0937fdfa8 gso: fix the header parser to read only
+b0d2eda75 ipsec: fix udp-encap in transport mode
+53f06a014 vlib: move pci api types from vnet/pci to vlib/pci
+e4e8c6b08 ipsec: fix chained ESP
+967e9afa6 ikev2: fix crash during peer live check
+5cee0bca5 ipsec: use id in ipsec_tunnel_protect_details
+8c18f85d3 nat: fix unknown proto translation out2in_ed
+936197467 udp: validate input data length
+164c44f0b ip: Fix the AH/ESP protocol numbers on the API
+6eef40bce session: fix fifos display
+d7b828f0c vppinfra: fix vppinfra test code build
+c35f3e835 misc: fix static analysis warnings
+b32436aab dpdk: VM VHOST tests with rxq>1 failing
+4fce36b8f ip: remove vl_api_address_family_t byte order swap
+d85666fdf session udp: fix transport flags and migration
+e33c0021c session: init port_proto_type asap
+39aa7a520 misc: fix sonarcloud html issue
+3e07a4a1e misc: sprintf be gone
+0250090fc misc: strcpy be gone
+1766ddca4 ip: reassembly: don't set error if no error
+c17d6cfaf ikev2: fix wrong index computation
+582eac5c3 misc:  fix python sonarcloud BLOCKER level issues
+a2ffc6c2f docs: pin down sphinx to avoid crash with Sphinx 3.0.0
+032a5e3da vat: fix static analysis warning
+483a3d819 sr: fix byte-order in steering API
+e10d167bf tcp: fix conf mtu parsing
+1f2e146bd tests: pin sphinx and sphinx-rtd-theme
+26c9d4b0c nat: don't drop packet for expired session
+b1bb51379 vat: fix vat strncpy stringop-overflow
+85bee7548 nat: ED: port re-use algorithm
+95e192533 l2: handle complete clone fail in l2_flood
+6e8e10f79 sr: Fix the coverity issue
+f18f09b16 acl: fix unresolved symbol for format_fib_prefix in vat plugin
+88cecfad9 ip: do not clear the locally-originated flag
+7d6971854 virtio: fix the tcp/udp checksum offloads
+61717cc38 nat: use correct data types for memory sizes
+8d0d8d2fc gbp: More reliable unit-tests
+954c70797 misc: check return values from vlib_buffer_copy(...)
+8324c55f9 ping: fix buffer allocator error handling
+1adc7e78a misc: fix error handling in punt_replicate
+9cbfb4c51 mpls: fix typo in error path
+ca5785216 bfd: always start timers with non-zero tick counts
+92bbfc297 udp: fix coverity warning
+6d7552ca8 session: update fifo slice on session migration
+6fe7b75f3 tls: adopt picotls engine to new session scheduling mechanism
+12813d5e4 session: fix leak on accept fifo alloc failure
+ae9c45938 fib: fix adjacency cli command issue
+91fd910d7 geneve: Fix the byte swapping for the VNI
+f50ef40ac virtio: fix gso and csum offload errors handling
+bc1a1a734 udp: fix local node no port error counter
+92e131468 quic: fix clean stream close
+35acaac18 fib: fix accessing empty dpo pool elements
+c39150df4 tls: make ctx_write function return the length of enqueue
+c54162981 dhcp: fix unicast pkts, clean up state machine
+dc3e96648 ipsec: validate number of input sas
+69eeadc03 vat: fix socket connection
+92d0eacef urpf: Allow locally generated packets on TX
+77ea42b31 session: detach session from app on cleanup
+063f2b86e udp: fix buffer trace
+bd7f3422b igmp: fix igmp proxy group merge
+77100efb3 bier: fix vector size confusing ASan
+ea9bc2859 ipsec: fix use-after-free
+95eb01fdc fib: fix use-after-free
+ce815deb7 vcl: fix app destroy
+82fc98fa4 dpdk: fix udp-encap for esp in transport mode
+ce21599c8 virtio: fix to use chained descriptors when missing indirect descriptor
+63551351b vat: fix static analysis warning
+101fc278c lisp: fix use-after-free
+701c099fa session: fix half-open cleanup
+c11822959 tls: fix Picotls tx hang issue
+040d47c2c gbp: fix l3-out anonymous test cleanup
+cbce80aaa vcl: expand vcl select maps in ldp if needed
+f49cf470c vcl: ensure sessions are open on select events
+da302e4fc session: avoid rx notifications on accepting sessions
+7ce23f25b session: fix use-after-free in input node
+0e6199dfa svm: check if fifo free list index is valid on alloc
+b9753540d sr: fix non-NULL terminated string overflow
+368104d06 vlib: queue_hi_thresh fix to avoid deadlock
+54582663a vat: fix increment_address(...)
+1e5ed9774 devices: Adding ConnectX-6 DX Device ID for validation
+08d01376d misc: asan: do not poison memory after munmap()
+332bc084d misc: asan: disable leak sanitizer by default
+350f6d6ef misc: asan: mark parsed elf memory as readable for ASan
+6440b7a60 misc: fix coverity warnings
+77d42fc71 svm: asan: fix asan support
+a04adbf53 tcp: fix use-after-free
+38ab5672b vcl: fix use-after-free
+f932f97d7 ip: fix format functions for u8 address_family
+c17ff6ec3 tcp: avoid bt sample access after possible pool realloc
+30a28c187 session: fix session_table_get_or_alloc
+a90ba644b nat: add/del ed_ext_ports only if the table is instantiated
+0e2751cc1 misc: update INFO.yaml
+b5c0d35f9 vapi: packed enum type generation
+82b62bbf5 virtio: vhost checksum problem for ipv6
+ec40a7d2b ip: Setting the Link-Local address from the API enables IPv6 on the interface
+e7f420177 nat: fix extended unit tests
+5581de6d6 nat: make usage of vnet_buffer2 transparent
+bf883bb08 acl: ACL creation CLI parsing fix
+f593b5792 vppinfra: finish deprecating qsort.c
+5e6222a03 vcl: generate select events on read/write errors
+e65eea360 dhcp: fix dhcp proxy behavior for qinq and dot1q subinterfaces
+81284163a devices: allow link state down with netlink
+be7dbbbfd build: add vppinfra/warnings.h to exported headers list
+ffbcf6178 vppinfra: selectively disable false-positive GCC-10 warnings
+9165e0365 ip: reassembly: fix one possible use-after-free
+a66971f98 vppinfra: selectively disable false-positive GCC-10 warnings
+83ceffcd9 ioam: do not reuse existing vnet symbol
+3ff8e23d7 tls: fix wrong usage of session close function issue
+5226d26d1 svm: null instead of panic if fifo hdr alloc fails
+a568a19b2 stats: add apis to delete simple/combined counters
+58db6e16c lisp: API cleanup
+beee60d2c ipsec: fix buffer alloc
+2857e7850 tap: use one tap fd per rx queue
+049d0b438 vlib: use flexible array in vlib_buffer for GCC-10
+635f5068f svm: fix fifo alignemnt in batch prealloc
+34de6fea1 flow: explicit rss function enum cast
+c4ae0fffb interface: fix interface_types.api enums
+d7586d50f vcl: add separate fcntl64 ldp handler
+28adbb3ae tap: fix missing "num-rx-queues" from cli help
+5a7f2f122 ip: use thread local vm instead of thread main for vlib_time_now calls
+6e39ff03a build: detect GNU Assembler AVX-512 bug and disable AVX-512 variants if needed
+e09912001 ikev2: use thread local vlib_main in vlib_time_now
+dc0ded7dd vcl: disconnect both flavors of bapi transport on destroy
+bf39597d4 session: cleanup listener segment manager on wrk free
+1a18d11ea tcp: fix v6 ll lookup fib
+6068601c2 l2: fix coverity warnings in l2_fwd.c
+e891ac2f1 misc: add Matt Smith to the committer list
+7f286f720 api: fix include_guard when path contains a plus
+24b417c48 ip-neighbor: honor walk callback return value
+b723ccf95 tcp: fix max tx sack blocks upper bound
