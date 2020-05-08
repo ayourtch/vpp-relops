@@ -28,7 +28,7 @@ git clone ${CURR_ROOT} vpp-uut
 cd vpp-uut
 
 # maybe grab the CRC checker
-# git fetch "https://gerrit.fd.io/r/vpp" refs/changes/81/26881/13 && git cherry-pick FETCH_HEAD || echo "Already there"
+# git fetch "https://gerrit.fd.io/r/vpp" refs/changes/81/26881/14 && git cherry-pick FETCH_HEAD || echo "Already there"
 
 
 echo "TEST 1: Check the current patchset..."
@@ -90,7 +90,7 @@ echo "TEST 9: Verify that the check fails if the changes are not committed"
 cat >>crccheck.api <<EOL
 autoreply define crc_new_check_in_progress
 {
-  option status="in_progress"
+  option status="in_progress";
   bool foobar;
 };
 EOL
@@ -113,6 +113,21 @@ git add crccheck.api
 git commit -m "new field added in in-progress api";
 extras/scripts/crcchecker.py --check-patchset
 
+echo "TEST13: Verify we fail the check if the file can not be compiled"
+cat >crccheck2.api <<EOL
+option version="0.0.1";
+autoreply define spot_the_error
+{
+  option status="in_progress"
+  bool something_important;
+};
+EOL
+git add crccheck2.api
+git commit -m "a new message with a syntax error";
+verify_check_patchset_fails
+
+# get rid of the "erroneous" commit in the previous test
+git reset --hard HEAD~1
 
 echo "TEST: All tests got the expected result, cleaning up."
 
