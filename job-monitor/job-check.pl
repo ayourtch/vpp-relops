@@ -211,3 +211,5 @@ my $job_name = "vpp-verify-master-centos7";
 update_job_data($job_name);
 my $job_name = "vpp-merge-master-centos7";
 update_job_data($job_name);
+my $job_name = "vpp-merge-master-ubuntu1804";
+update_job_data($job_name);
