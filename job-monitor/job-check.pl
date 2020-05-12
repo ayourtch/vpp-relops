@@ -12,7 +12,7 @@ sub curl_get_all_jobs_sql {
 	sleep(3);
 
 	foreach $aLine (split(/[\r\n]+/, $command_output)) {
-		if ($aLine =~ /\#(\d+)/ ) {
+		if ($aLine =~ /[^(]\#(\d+)/ ) {
 			my $job_number = $1;
 			my $job_status = "unknown";
 			my $job_completed = 0;
@@ -40,6 +40,8 @@ sub curl_get_executor_name {
 	my $executor_name = "";
 	foreach $aLine (split(/[\r\n]+/, $command_output)) {
 		if ($aLine =~ /            on ([^<]+)/) {
+			$executor_name = $1;
+		} elsif ($aLine =~ /          on <a href="\/computer\/([^"]+)"/) {
 			$executor_name = $1;
 		}
 	}
