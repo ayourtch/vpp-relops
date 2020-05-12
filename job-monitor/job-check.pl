@@ -136,6 +136,7 @@ sub cli_check_alloc {
 	my $now = time();
 	my $sql = "";
 	run_sql("INSERT INTO NomadAllocStatuses VALUES('$alloc_id', $now, '$command_output');\n");
+	run_sql("UPDATE NomadAllocs SET NomadQueried=1 WHERE NomadAllocID='$alloc_id';\n");
 }
 
 sub cli_check_executor {
@@ -205,4 +206,6 @@ update_job_data($job_name);
 my $job_name = "vpp-verify-master-ubuntu1804";
 update_job_data($job_name);
 my $job_name = "vpp-verify-master-centos7";
+update_job_data($job_name);
+my $job_name = "vpp-merge-master-centos7";
 update_job_data($job_name);
