@@ -63,6 +63,33 @@ sub get_sql_data {
 	return ($ret);
 }
 
+sub cli_is_job_killed {
+	my $job_id = $_[0];
+	my $url = "https://jenkins.fd.io/view/vpp/job/$job_id/console";
+	print("Sleep then fetch $url\n");
+	sleep(2);
+        system("curl $url | grep illed | grep -v 'echo Agent pid '");
+	my $retcode = $? >> 8;
+	my $been_killed = 0;
+	if ($retcode == 0) {
+		$been_killed = 1;
+	}
+	return ($been_killed);
+}
+
+sub check_killed_jobs() {
+	$command_output = get_sql_data("SELECT jj.JenkinsJobID FROM JenkinsJobs AS jj LEFT JOIN JenkinsJobsKilled as jjk ON jjk.JenkinsJobID = jj.JenkinsJobID WHERE jjk.JenkinsJobID IS NULL ORDER BY jj.AddedAt DESC LIMIT 20;");
+	my $sql = "";
+	my $now = time();
+	foreach $aLine (split(/[\r\n]+/, $command_output)) {
+		print("JobID: $aLine\n");
+		my $is_killed = cli_is_job_killed($aLine);
+		print("Was killed: $is_killed\n");
+		$sql = $sql . "INSERT INTO JenkinsJobsKilled VALUES('$aLine', $now, $is_killed);\n";
+	}
+	run_sql($sql);
+}
+
 sub ensure_db() {
 	my $sql = <<__EE__;
 
@@ -74,6 +101,13 @@ CREATE TABLE JenkinsJobs (
    AddedAt INTEGER NOT NULL,
    JenkinsExecutor nvarchar(100) NOT NULL
 );
+
+CREATE TABLE JenkinsJobsKilled (
+   JenkinsJobID nvarchar(100) NOT NULL PRIMARY KEY,
+   AddedAt INTEGER NOT NULL,
+   WasKilled INTEGER NOT NULL
+);
+
 
 CREATE TABLE JenkinsExecutors (
 	JenkinsExecutorID nvarchar(100) NOT NULL PRIMARY KEY,
@@ -213,3 +247,4 @@ my $job_name = "vpp-merge-master-centos7";
 update_job_data($job_name);
 my $job_name = "vpp-merge-master-ubuntu1804";
 update_job_data($job_name);
+check_killed_jobs();
