@@ -6,13 +6,16 @@
 use Data::Dumper;
 
 # what is the "previous baseline" tag
-$base_tag = 'v19.08.1';
+$base_tag = 'v20.05-rc0';
 
 # the branch where we are making the release
-$base_branch = 'stable/1908';
+$base_branch = 'stable/2005';
 
 # the release for which we are making the release notes
-$release_version = '19.08.2';
+$release_version = '20.05';
+
+# previous release version
+$prev_release_version = '20.01';
 
 
 # make string ready to be used for RELEASE.md
@@ -28,6 +31,12 @@ sub mdstring {
 	# escape the '_' for markdown
 	$string =~ s/([<>_])/\\$1/g;
 	return $string;
+}
+
+sub print_commit_count {
+	my $count = `git rev-list $base_tag..$base_branch | wc -l`;
+	chomp($count);
+	print("More than $count commits since the $prev_release_version release.\n");
 }
 
 # the command string passed as argument here should be something like:
@@ -167,22 +176,89 @@ sub print_markdown {
 sub get_api_changes {
 	my $base_tag_branch = "$base_branch-api-baseline";
 	$base_tag_branch =~ s/\//-/g;
+	`git checkout master`;
 	`git branch -d $base_tag_branch`;
 	`git checkout -b $base_tag_branch $base_tag`;
+	`make install-dep`;
+	`git clean -fdx`;
+	print STDERR "Building base versio for API changesn\n";
 	`make build`;
+	`sudo rm /tmp/api-table.$base_tag_branch`;
 	`sudo ./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on save-api-table api-table.$base_tag_branch } unix { cli-listen /run/vpp/api-cli.sock }`;
-	system('sudo kill $(ps -ef | grep \'/run/vpp/api-cli.sock\' | grep -v grep | awk \'{ print $2; }\')');
+
 	`git checkout $base_branch`;
+	print STDERR "Building current version for API changesn\n";
 	`git branch -d $base_tag_branch`;
+	`make install-dep`;
+	system("sudo pkill vpp");
+	`git clean -fdx`;
 	`make build`;
 
 	`sudo ./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on } unix { cli-listen /run/vpp/api-cli.sock }`;
 	sleep(30);
 	$api_changes = `sudo ./build-root/install-vpp_debug-native/vpp/bin/vppctl -s /run/vpp/api-cli.sock show api dump file /tmp/api-table.$base_tag_branch compare`;
-	system('sudo kill $(ps -ef | grep \'/run/vpp/api-cli.sock\' | grep -v grep | awk \'{ print $2; }\')');
+	system("sudo pkill vpp");
 
 	return($api_changes);
 }
+
+sub print_api_change_commits {
+	print "### Patches that changed API definitions\n\n";
+	my $emit_md = 1;
+	my $command_output = `find . -name '*.api' -print`;
+	foreach $aLine (split(/[\r\n]+/, $command_output)) {
+		$aLine =~ s#^\.\/##g;
+		my $command_output = `git log --oneline $base_tag..$base_branch $aLine`;
+		if ($command_output eq "") {
+			next;
+		}
+		if ($emit_md) {
+			print("| \@c $aLine ||\n");
+			foreach $aLine (split(/[\r\n]+/, $command_output)) {
+				my @parts = split(/\s+/,$aLine);
+				my $commit = shift(@parts);
+				my $message = join(" ", @parts);
+				$message =~ s/\|/\\|/g;
+				print("| [$commit](https://gerrit.fd.io/r/gitweb?p=vpp.git;a=commit;h=$commit) | $message |\n");
+			}
+			print("\n");
+		} else {
+			print("$aLine\n");
+			print("$command_output\n");
+		}
+	}
+}
+
+sub print_feature_change_commits {
+	print "### Patches that changed FEATURE.yaml definitions\n\n";
+	my $emit_md = 1;
+	my $command_output = `find . -name 'FEATURE.yaml' -print`;
+	foreach $aLine (split(/[\r\n]+/, $command_output)) {
+		$aLine =~ s#^\.\/##g;
+		my $file_name = $aLine;
+		my $command_output = `git log --oneline $base_tag..$base_branch $aLine`;
+		if ($command_output eq "") {
+			next;
+		}
+		if ($emit_md) {
+			print("| \@c $aLine ||\n");
+			foreach $aLine (split(/[\r\n]+/, $command_output)) {
+				my @parts = split(/\s+/,$aLine);
+				my $commit = shift(@parts);
+				my $message = join(" ", @parts);
+				$message =~ s/\|/\\|/g;
+				print("| [$commit](https://gerrit.fd.io/r/gitweb?p=vpp.git;a=commit;h=$commit) | $message |\n");
+				my $command_output = `git diff $commit~1..$commit $file_name`;
+				print("```\n$command_output\n```\n");
+			}
+			print("\n");
+		} else {
+			print("$aLine\n");
+			print("$command_output\n");
+		}
+	}
+}
+
 
 sub print_release_note {
 
@@ -190,9 +266,14 @@ sub print_release_note {
 	my $page_id = "release_notes_$release_version";
 	$page_id =~ s/\.//g;
 
-	my $the_header = <<__E__;
-\@page $page_id Release notes for VPP $release_version
+        print("\@page $page_id Release notes for VPP $release_version\n\n");
+	print_commit_count();
 
+	my $the_header = <<__E__;
+
+## Release Highlights
+
+REPLACE AS NEEDED
 The $release_version is an LTS release. It contains numerous fixes,
 as well as new features and API additions.
 
@@ -206,6 +287,22 @@ __E__
 	# my $commits = collect_commits("git log --oneline --reverse --decorate=no --grep 'VPP-' v19.08.1..stable/1908");
 
 	print_markdown($components, $commits);
+
+	my $trailer = <<__E__;
+
+## Known issues
+
+For the full list of issues please refer to fd.io [JIRA](https://jira.fd.io).
+
+## Fixed issues
+
+For the full list of fixed issues please refer to:
+- fd.io [JIRA](https://jira.fd.io)
+- git [commit log](https://git.fd.io/vpp/log/?h=$base_branch)
+
+__E__
+
+	print($trailer);
 
 	my $api_changes_header = <<__E__;
 
@@ -221,19 +318,10 @@ __E__
 
 	print($api_changes_header);
 	print("$api_changes\n");
-	my $trailer = <<__E__;
-
-## Fixed issues
-
-For the full list of fixed issues please refer to:
-- fd.io [JIRA](https://jira.fd.io)
-- git [commit log](https://git.fd.io/vpp/log/?h=$base_branch)
-
-__E__
-
-	print($trailer);
+        print_api_change_commits();
 
 }
+
 
 #
 # FIXME: generate the data as a string rather than printing it.
@@ -245,9 +333,5 @@ __E__
 # Type: docs
 # "
 
-
-
 print_release_note();
-
-
 
