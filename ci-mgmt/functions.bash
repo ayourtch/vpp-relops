@@ -224,6 +224,7 @@ jjb-sandbox-env()
     rm -rf $WS_ROOT/env \
         && python3 -m venv $WS_ROOT/env \
         && source $WS_ROOT/env/bin/activate \
+	&& pip install wheel \
         && pip install jenkins-job-builder==3.0.2
 
     echo
