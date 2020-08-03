@@ -215,7 +215,7 @@ $|++;
 
 sub cherry_pick_commit {
   my $fix_id = $_[0];
-    $fix_id = $1;
+    system("git log --stat $fix_id~1..$fix_id");
     if (is_api_change($fix_id)) {
       print("API-: $str\n");
       next;
@@ -233,10 +233,13 @@ sub cherry_pick_commit {
     $ret_code = $?;
     local $status = "OK++";
     if ($ret_code != 0) {
-      system("git reset --hard HEAD >/dev/null 2>/dev/null");
       if ($output =~ /The previous cherry-pick is now empty/) {
+        system("git reset --hard HEAD >/dev/null 2>/dev/null");
 	$status="OK--";
       } else {
+	my $conflict = `git diff`;
+	$output = $output . "\n\nDIFF:\n\n$conflict\n";
+        system("git reset --hard HEAD >/dev/null 2>/dev/null");
         $status = "ERR-";
 	my @anchor_commits = get_anchor_commits($fix_id, \&is_interesting);
 	foreach (@anchor_commits) {
@@ -314,6 +317,5 @@ sub check_git_config {
 }
 
 check_git_config();
-print("Cherry-pick commit: $ARGV[0]");
-exit(0);
+print("Cherry-pick commit: $ARGV[0]\n");
 cherry_pick_commit($ARGV[0]);
