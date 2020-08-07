@@ -16,23 +16,43 @@ DST_BRANCH=$1
 TMP_BRANCH=$2
 SRC_BRANCH=$3
 
+CURR_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+trap cleanup TERM
+trap cleanup INT
+
+cleanup() {
+	echo "Switch back to branch: ${CURR_BRANCH}"
+	git checkout ${CURR_BRANCH}
+	exit 1;
+}
 
 
-if ! CHANGES=$(git rev-list --reverse ${TMP_BRANCH}..${SRC_BRANCH}); then
-	git checkout -b ${TMP_BRANCH} ${DST_BRANCH}
-	CHANGES=$(git rev-list --reverse ${TMP_BRANCH}..${SRC_BRANCH})
-else
-	echo "Branch ${TMP_BRANCH} already exists... Are you sure ? Press enter."
+# first we need to create the branch and warn if it already exists (potential for a mass-rebase)
+if git checkout ${TMP_BRANCH}; then
+	echo "Temp branch ${TMP_BRANCH} already exists! Are you sure ?"
+	git log --reverse --oneline ${DST_BRANCH}..${TMP_BRANCH} 
 	read PAUSE
+else
+	git checkout -b ${TMP_BRANCH} ${DST_BRANCH}
 fi
 
-echo "Ready to start pushing... Press enter."
+# ensure it is truly based off the destination branch
+# (if there were anything in it before)
+git rebase ${DST_BRANCH}
+
+# get list of changes from source branch to add here 
+CHANGES=$(git rev-list --reverse ${TMP_BRANCH}..${SRC_BRANCH})
+FIRST_CHANGE=$(git rev-list --reverse ${TMP_BRANCH}..${SRC_BRANCH} | head -n 1)
+
+echo "Ready to start pushing... First change to add:"
+git log -1 ${FIRST_CHANGE}
 read PAUSE
 
 for C in $CHANGES; do
   git log -1 $C
-  git rebase $C
-  
+  git checkout ${TMP_BRANCH}
+  git reset --hard $C
   if ! git push origin HEAD:refs/for/${DST_BRANCH}; then
 	  echo "Git push failed, press any key to continue or Ctrl-C to stop"
 	  read PAUSE
