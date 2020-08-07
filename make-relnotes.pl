@@ -5,18 +5,34 @@
 
 use Data::Dumper;
 
+sub get_next_vpp_version {
+	my $base_tag = $_[0];
+	if ($base_tag =~ /v(\d+\.\d+)-rc0/) {
+		return $1;
+	}
+	die "Base tag $base_tag not handled yet!";
+}
+
 # what is the "previous baseline" tag
-$base_tag = 'v20.05-rc0';
+# $base_tag = 'v20.05-rc0';
+
+$sed_cmd = 's/-[^-]\+-[^-]\+$//g';
+$base_tag = `git describe --long HEAD | sed -e '$sed_cmd'`;
+chomp($base_tag);
+
+if ($base_tag eq "") {
+	die("Empty base tag!");
+}
 
 # the branch where we are making the release
-$base_branch = 'stable/2005';
+# $base_branch = 'stable/2005';
+$base_branch = `git rev-parse --abbrev-ref HEAD`;
+chomp($base_branch);
+
 
 # the release for which we are making the release notes
-$release_version = '20.05';
-
-# previous release version
-$prev_release_version = '20.01';
-
+# $release_version = '20.05';
+$release_version = get_next_vpp_version($base_tag);
 
 # make string ready to be used for RELEASE.md
 sub mdstring {
@@ -36,7 +52,7 @@ sub mdstring {
 sub print_commit_count {
 	my $count = `git rev-list $base_tag..$base_branch | wc -l`;
 	chomp($count);
-	print("More than $count commits since the $prev_release_version release.\n");
+	print("More than $count commits since the previous release.\n");
 }
 
 # the command string passed as argument here should be something like:
@@ -259,28 +275,49 @@ sub print_feature_change_commits {
 	}
 }
 
+sub print_api_changes {
+	my $api_changes = get_api_changes();
+
+	my $api_changes_header = <<__E__;
+
+## API changes
+
+Description of results:
+
+* _Definition changed_: indicates that the API file was modified between releases.
+* _Only in image_: indicates the API is new for this release.
+* _Only in file_: indicates the API has been removed in this release.
+
+__E__
+
+	print($api_changes_header);
+	print("$api_changes\n");
+	print_api_change_commits();
+}
+
 
 sub print_release_note {
 
-	my $api_changes = get_api_changes();
 	my $page_id = "release_notes_$release_version";
 	$page_id =~ s/\.//g;
 
-        print("\@page $page_id Release notes for VPP $release_version\n\n");
+	print("\@page $page_id Release notes for VPP $release_version\n\n");
 	print_commit_count();
+
+	my $date_now = `date`;
+	chomp($date_now);
 
 	my $the_header = <<__E__;
 
 ## Release Highlights
 
-REPLACE AS NEEDED
-The $release_version is an LTS release. It contains numerous fixes,
-as well as new features and API additions.
+These are the *DRAFT* release notes for the upcoming VPP $release_version release,
+generated as of $date_now.
 
 ## Features
 
 __E__
-        print($the_header);
+	print($the_header);
 
 	my $components = read_maintainers();
 	my $commits = collect_commits("git log --oneline --reverse --decorate=no --grep 'Type: feature' $base_tag..$base_branch");
@@ -304,21 +341,6 @@ __E__
 
 	print($trailer);
 
-	my $api_changes_header = <<__E__;
-
-## API changes
-
-Description of results:
-
-* _Definition changed_: indicates that the API file was modified between releases.
-* _Only in image_: indicates the API is new for this release.
-* _Only in file_: indicates the API has been removed in this release.
-
-__E__
-
-	print($api_changes_header);
-	print("$api_changes\n");
-        print_api_change_commits();
 
 }
 
@@ -334,4 +356,4 @@ __E__
 # "
 
 print_release_note();
-
+# print_api_changes();
