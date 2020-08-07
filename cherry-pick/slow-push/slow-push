@@ -1,0 +1,43 @@
+#!/bin/sh
+set -eux
+
+#
+# This script slowly submits the changes from SRC_BRANCH onto DST_BRANCH,
+# in order to work around the verify job failures caused by the git
+# checkout proxy running out of resources
+#
+# The TMP_BRANCH is rebased 
+#
+
+
+SLEEP_SEC=420
+
+DST_BRANCH=$1
+TMP_BRANCH=$2
+SRC_BRANCH=$3
+
+
+
+if ! CHANGES=$(git rev-list --reverse ${TMP_BRANCH}..${SRC_BRANCH}); then
+	git checkout -b ${TMP_BRANCH} ${DST_BRANCH}
+	CHANGES=$(git rev-list --reverse ${TMP_BRANCH}..${SRC_BRANCH})
+else
+	echo "Branch ${TMP_BRANCH} already exists... Are you sure ? Press enter."
+	read PAUSE
+fi
+
+echo "Ready to start pushing... Press enter."
+read PAUSE
+
+for C in $CHANGES; do
+  git log -1 $C
+  git rebase $C
+  
+  if ! git push origin HEAD:refs/for/${DST_BRANCH}; then
+	  echo "Git push failed, press any key to continue or Ctrl-C to stop"
+	  read PAUSE
+  fi
+  echo "$(date): Sleeping for ${SLEEP_SEC}..."
+  read -t ${SLEEP_SEC} PAUSE || true
+done
+
