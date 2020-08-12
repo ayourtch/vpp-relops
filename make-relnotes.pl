@@ -52,7 +52,9 @@ sub mdstring {
 sub print_commit_count {
 	my $count = `git rev-list $base_tag..$base_branch | wc -l`;
 	chomp($count);
-	print("More than $count commits since the previous release.\n");
+	my $count_fix = `git rev-list --grep 'Type: fix' $base_tag..$base_branch | wc -l`;
+	chomp($count_fix);
+	print("More than $count commits since the previous release, including $count_fix fixes.\n");
 }
 
 # the command string passed as argument here should be something like:
