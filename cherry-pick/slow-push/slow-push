@@ -53,6 +53,15 @@ for C in $CHANGES; do
   git log -1 $C
   git checkout ${TMP_BRANCH}
   git reset --hard $C
+  if ! extras/scripts/check_commit_msg.sh; then
+	  echo "commit message check failed, press any key to continue or Ctrl-C to stop"
+	  read PAUSE
+  fi
+  if ! make checkstyle; then
+	  echo "make checkstyle check failed, press any key to continue or Ctrl-C to stop"
+	  read PAUSE
+  fi
+
   if ! git push origin HEAD:refs/for/${DST_BRANCH}; then
 	  echo "Git push failed, press any key to continue or Ctrl-C to stop"
 	  read PAUSE
