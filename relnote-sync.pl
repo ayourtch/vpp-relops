@@ -35,7 +35,7 @@ sub read_relnotes {
 			$curr_page_data = $curr_page_data . "$aLine\n";
 		}
 	}
-	if ($curr_page != "") {
+	if ($curr_page ne "") {
 		$pages->{$curr_page} = { "data" => $curr_page_data, "title" => $curr_page_title };
 	}
 	close(F);
@@ -54,6 +54,7 @@ sub print_pages {
 	foreach my $p (@{$page_keys}) {
 		print("* \@subpage $p\n");
 	}
+	print("\n");
 	foreach my $p (@{$page_keys}) {
 		my $aTitle = $pages->{$p}->{'title'};
 		my $aData = $pages->{$p}->{'data'};
