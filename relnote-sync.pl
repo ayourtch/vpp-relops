@@ -68,6 +68,14 @@ my $target_pages = read_relnotes($target_branch);
 # print Dumper($target_pages);
 while (my $aBranch = shift) {
 	print STDERR "target branch: $aBranch\n";
+	if ($aBranch =~ /^TBD:(\d\d)\.(\d\d)$/) {
+		my $VerMajor = $1;
+		my $VerMinor = $2;
+		my $aData = "\nTBD\n\n";
+		my $p = "release_notes_$VerMajor$VerMinor";
+		my $aTitle = "Release notes for VPP $VerMajor.$VerMinor";
+		$target_pages->{$p} = { "data" => $aData, 'title' => $aTitle };
+	}
 	my $some_pages = read_relnotes($aBranch);
 	# print Dumper($some_pages);
 	foreach my $p (keys(%{$some_pages})) {
