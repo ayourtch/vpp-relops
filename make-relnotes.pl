@@ -4,6 +4,8 @@
 
 
 use Data::Dumper;
+use Env;
+use Env qw(VPP_CHECK_API);
 
 sub get_next_vpp_version {
 	my $base_tag = $_[0];
@@ -230,6 +232,9 @@ sub get_api_changes {
 	$api_changes = `sudo ./build-root/install-vpp_debug-native/vpp/bin/vppctl -s /run/vpp/api-cli.sock show api dump file /tmp/api-table.$base_tag_branch compare`;
 	system("sudo pkill vpp");
 
+	# remove the ms-dos linefeeds
+	$api_changes =~ s/\r//gsm;
+
 	return($api_changes);
 }
 
@@ -371,4 +376,6 @@ __E__
 # "
 
 print_release_note();
-# print_api_changes();
+if ($VPP_CHECK_API) {
+  print_api_changes();
+}
