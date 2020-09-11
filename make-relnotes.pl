@@ -10,6 +10,17 @@ sub get_next_vpp_version {
 	if ($base_tag =~ /v(\d+\.\d+)-rc0/) {
 		return $1;
 	}
+	if ($base_tag =~ /v(\d+\.\d+)-rc[12]/) {
+		return $1;
+	}
+	die "Base tag $base_tag not handled yet!";
+}
+
+sub get_base_tag {
+	my $base_tag_raw = $_[0];
+	if ($base_tag_raw =~ /v(\d+\.\d+)-rc[012]/) {
+		return "v$1-rc0";
+	}
 	die "Base tag $base_tag not handled yet!";
 }
 
@@ -17,8 +28,10 @@ sub get_next_vpp_version {
 # $base_tag = 'v20.05-rc0';
 
 $sed_cmd = 's/-[^-]\+-[^-]\+$//g';
-$base_tag = `git describe --long HEAD | sed -e '$sed_cmd'`;
-chomp($base_tag);
+$base_tag_raw = `git describe --long HEAD | sed -e '$sed_cmd'`;
+chomp($base_tag_raw);
+
+$base_tag = get_base_tag($base_tag_raw);
 
 if ($base_tag eq "") {
 	die("Empty base tag!");
