@@ -275,6 +275,7 @@ sub print_api_change_commits {
 		}
 		if ($emit_md) {
 			print("| \@c $aLine ||\n");
+			print("| ------- | ------- |\n");
 			foreach $aLine (split(/[\r\n]+/, $command_output)) {
 				my @parts = split(/\s+/,$aLine);
 				my $commit = shift(@parts);
