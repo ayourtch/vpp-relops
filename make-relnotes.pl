@@ -238,6 +238,25 @@ sub get_api_changes {
 	return($api_changes);
 }
 
+sub get_api_process_changes {
+	my $api_changes = `./extras/scripts/crcchecker.py --git-revision $base_tag | egrep -e 'deprecated:|in-progress:'`;
+	my @in_progress_apis;
+	my @deprecated_apis;
+	foreach my $aLine (split(/[\r\n]+/, $api_changes)) {
+		my @parts = split(/[: ]+/, $aLine);
+		if ($parts[0] =~ /deprecated/) {
+			push(@deprecated_apis, $parts[1]);
+		} elsif ($parts[0] =~ /in-progress/) {
+			push(@in_progress_apis, $parts[1]);
+		}
+	}
+	@deprecated_apis = sort(@deprecated_apis);
+	@in_progress_apis = sort(@in_progress_apis);
+	my $result = { "deprecated" => \@deprecated_apis, "in_progress" => \@in_progress_apis };
+	# print Dumper($result);
+	return $result;
+}
+
 sub print_api_change_commits {
 	print "### Patches that changed API definitions\n\n";
 	my $emit_md = 1;
@@ -263,6 +282,7 @@ sub print_api_change_commits {
 			print("$command_output\n");
 		}
 	}
+	print("\n");
 }
 
 sub print_feature_change_commits {
@@ -295,6 +315,44 @@ sub print_feature_change_commits {
 	}
 }
 
+sub print_api_process_changes {
+	my $api_process_changes = get_api_process_changes();
+
+	my $api_deprecated_header = <<__E__;
+
+### Newly deprecated API messages
+
+These messages are still there in the API, but can and probably
+will disappear in the next release.
+
+__E__
+	my $api_in_progress_header = <<__E__;
+
+### In-progress API messages
+
+These messages are provided for testing and experimentation only.
+They are *not* subject to any compatibility process,
+and therefore can arbitrarily change or disappear at *any* moment.
+Also they may have less than satisfactory testing, making
+them unsuitable for other use than the technology preview.
+If you are intending to use these messages in production projects,
+please collaborate with the feature maintainer on their productization.
+
+__E__
+
+
+	print($api_deprecated_header);
+	foreach my $m (@{$api_process_changes->{'deprecated'}}) {
+		print("- $m\n");
+	}
+	print($api_in_progress_header);
+	foreach my $m (@{$api_process_changes->{'in_progress'}}) {
+		print("- $m\n");
+	}
+	print("\n");
+}
+
+
 sub print_api_changes {
 	my $api_changes = get_api_changes();
 
@@ -312,7 +370,6 @@ __E__
 
 	print($api_changes_header);
 	print("$api_changes\n");
-	print_api_change_commits();
 }
 
 
@@ -379,3 +436,5 @@ print_release_note();
 if ($VPP_CHECK_API) {
   print_api_changes();
 }
+print_api_process_changes();
+print_api_change_commits();
