@@ -22,7 +22,7 @@ echo "VPP package list prefix: ${VPP_PACKAGE_LIST}"
 export VPP_CHECK_VERSION=${VPP_CHECK_VERSION:-${VPP_EXACT_VERSION:+${VPP_EXACT_VERSION}}}
 
 # Prompt user to confirm verification criteria
-echo "Repo: ${PACKAGECLOUD_REPO}, force install version: '${VPP_EXACT_VERSION}', check version: '${VPP_CHECK_VERSION}'"
+echo "PACKAGECLOUD_REPO: ${PACKAGECLOUD_REPO}, force install (VPP_EXACT_VERSION): '${VPP_EXACT_VERSION}', VPP_CHECK_VERSION: '${VPP_CHECK_VERSION}'"
 read -p "Press enter when ready:" ENTER
 
 if [ "$VPP_EXACT_VERSION" = "" ]; then
@@ -31,7 +31,11 @@ else
   BUILD_ARG_VERSION="--build-arg VPP_EXACT_VERSION=${VPP_EXACT_VERSION}"
 fi
 
-TEST_ENVIRONMENTS="ubuntu1604 ubuntu1804 centos"
+# TEST_ENVIRONMENTS="ubuntu1604 ubuntu1804 centos"
+TEST_ENVIRONMENTS=$(ls $VPP_PACKAGE_LIST/packagelist.*  | sed -e 's/^.\+packagelist.//g' | tr '\r\n' ' ')
+
+echo "Environments: $TEST_ENVIRONMENTS"
+exit 1
 
 # build the three containers
 echo "-----------------------"
