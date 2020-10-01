@@ -16,7 +16,7 @@ if [ -z "${VPP_PACKAGE_LIST+set}" ]; then
   VPP_PACKAGE_LIST=${VPP_PACKAGE_LIST:-"packagelists/default"}
 fi
 export VPP_PACKAGE_LIST
-echo "VPP package list prefix: ${VPP_PACKAGE_LIST}"
+echo "VPP package list prefix (VPP_PACKAGE_LIST): ${VPP_PACKAGE_LIST}"
 
 # which version to check for in the show outputs
 export VPP_CHECK_VERSION=${VPP_CHECK_VERSION:-${VPP_EXACT_VERSION:+${VPP_EXACT_VERSION}}}
@@ -34,8 +34,7 @@ fi
 # TEST_ENVIRONMENTS="ubuntu1604 ubuntu1804 centos"
 TEST_ENVIRONMENTS=$(ls $VPP_PACKAGE_LIST/packagelist.*  | sed -e 's/^.\+packagelist.//g' | tr '\r\n' ' ')
 
-echo "Environments: $TEST_ENVIRONMENTS"
-exit 1
+echo "Test Environments: $TEST_ENVIRONMENTS"
 
 # build the three containers
 echo "-----------------------"
