@@ -216,21 +216,27 @@ sub get_api_changes {
 	`git clean -fdx`;
 	print STDERR "Building base versio for API changesn\n";
 	`make build`;
-	`sudo rm /tmp/api-table.$base_tag_branch`;
-	`sudo ./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on save-api-table api-table.$base_tag_branch } unix { cli-listen /run/vpp/api-cli.sock }`;
+	`rm -f /tmp/api-table.$base_tag_branch`;
+	print STDERR "Collecting the table of old APIs from running VPP\n";
+	`./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on save-api-table api-table.$base_tag_branch } unix { cli-listen /tmp/vpp-api-cli.sock }`;
+	print STDERR "Checking out branch $base_branch";
 
 	`git checkout $base_branch`;
 	print STDERR "Building current version for API changesn\n";
 	`git branch -d $base_tag_branch`;
 	`make install-dep`;
-	system("sudo pkill vpp");
+	print STDERR "Stopping VPP\n";
+	`pkill vpp`;
+	print STDERR "Cleaning up and rebuilding VPP\n";
 	`git clean -fdx`;
 	`make build`;
 
-	`sudo ./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on } unix { cli-listen /run/vpp/api-cli.sock }`;
+	`./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on } unix { cli-listen /tmp/vpp-api-cli.sock }`;
+	print STDERR "Sleep for 30 sec to let VPP come up\n";
 	sleep(30);
-	$api_changes = `sudo ./build-root/install-vpp_debug-native/vpp/bin/vppctl -s /run/vpp/api-cli.sock show api dump file /tmp/api-table.$base_tag_branch compare`;
-	system("sudo pkill vpp");
+	$api_changes = `./build-root/install-vpp_debug-native/vpp/bin/vppctl -s /tmp/vpp-api-cli.sock show api dump file /tmp/api-table.$base_tag_branch compare`;
+	print STDERR "Stopping VPP\n";
+	`pkill vpp`;
 
 	# remove the ms-dos linefeeds
 	$api_changes =~ s/\r//gsm;
