@@ -214,7 +214,7 @@ sub get_api_changes {
 	`git checkout -b $base_tag_branch $base_tag`;
 	`make install-dep`;
 	`git clean -fdx`;
-	print STDERR "Building base versio for API changesn\n";
+	print STDERR "Building base version for API changes\n";
 	`make build`;
 	`rm -f /tmp/api-table.$base_tag_branch`;
 	print STDERR "Collecting the table of old APIs from running VPP\n";
