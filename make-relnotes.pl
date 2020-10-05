@@ -397,7 +397,7 @@ sub print_release_note {
 
 ## Release Highlights
 
-:::DELETE-ME::: These are the *DRAFT* release notes for the upcoming VPP $release_version release, generated as on $date_now.
+These are the *DRAFT* release notes for the upcoming VPP $release_version release, generated as on $date_now.
 
 HIGHLIGHTS-PLACEHOLDER
 
