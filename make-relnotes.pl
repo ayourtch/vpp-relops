@@ -200,7 +200,7 @@ sub print_markdown {
 			# print(Dumper($aCommit));
 			my $msg = $aCommit->{'comment_r'};
 			my $cid = $aCommit->{'commit_id'};
-			my $aOutLine = "$msg ($cid)";
+			my $aOutLine = "$msg ([$cid](https://gerrit.fd.io/r/gitweb?p=vpp.git;a=commit;h=$cid))";
 			print("$indent  - $aOutLine\n");
 		}
 	}
