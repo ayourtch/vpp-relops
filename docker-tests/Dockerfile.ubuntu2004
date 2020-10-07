@@ -1,5 +1,5 @@
 # Download base ubuntu image
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # exact version to pin down the install with (e.g. "19.01.2-release"), or empty
 ARG VPP_EXACT_VERSION
@@ -19,6 +19,8 @@ RUN export VPP_VERSION_ARG
 
 RUN echo ${VPP_CHECK_VERSION} > /VPP_CHECK_VERSION.txt
 
+ENV VPP_INSTALL_SKIP_SYSCTL=1
+RUN export VPP_INSTALL_SKIP_SYSCTL
 
 RUN apt-get update && true
 RUN apt-get upgrade -y && true
