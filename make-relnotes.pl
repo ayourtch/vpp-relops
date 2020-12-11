@@ -206,6 +206,29 @@ sub print_markdown {
 	}
 }
 
+# wait for a couple of minutes until file appears
+sub wait_file {
+        my $fname = $_[0];
+        my $waitsec = 3;
+        for(my $t=0; $t<120; $t++) {
+                my $mtime = (stat($fname))[9];
+                if ($mtime) {
+                        print(STDERR "File $fname exists\n");
+                        if ((time - $mtime) < $waitsec) {
+                                print(STDERR "Waiting $waitsec sec on mtime of $fname ...$t\n");
+                                sleep(1);
+                        } else {
+                                return 1;
+                        }
+                } else {
+                        print(STDERR "Waiting for file $fname...$t\n");
+                        sleep(1);
+                }
+        }
+        return 0;
+}
+
+
 sub get_api_changes {
 	my $base_tag_branch = "$base_branch-api-baseline";
 	$base_tag_branch =~ s/\//-/g;
@@ -219,7 +242,10 @@ sub get_api_changes {
 	`rm -f /tmp/api-table.$base_tag_branch`;
 	print STDERR "Collecting the table of old APIs from running VPP\n";
 	`./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on save-api-table api-table.$base_tag_branch } unix { cli-listen /tmp/vpp-api-cli.sock } plugins { plugin dpdk_plugin.so { disable } }`;
-	wait_file("/tmp/api-table.$base_tag_branch");
+	if (!wait_file("/tmp/api-table.$base_tag_branch")) {
+		print STDERR "Can not continue without original API\n";
+		exit(1);
+	}
 	print STDERR `ls -al /tmp/api-table.$base_tag_branch`;
 	print STDERR "Checking out branch $base_branch";
 
