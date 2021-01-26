@@ -2,7 +2,7 @@
 set -eu
 mkdir /run || true
 mkdir /run/vpp || true
-/usr/bin/vpp unix { cli-listen /run/vpp/cli.sock } 2> /dev/null
+/usr/bin/vpp unix { cli-listen /run/vpp/cli.sock } plugins { plugin dpdk_plugin.so { disable } } 2> /dev/null
 
 echo Waiting 10 sec for VPP to boot...
 sleep 10
