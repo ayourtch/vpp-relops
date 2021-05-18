@@ -251,7 +251,7 @@ sub get_api_changes {
 
 	`git checkout $base_branch`;
 
-	print STDERR "adding the patch for the API CRC32 algorithm change detection"
+	print STDERR "adding the patch for the API CRC32 algorithm change detection";
 	`git fetch "https://gerrit.fd.io/r/vpp" refs/changes/59/32359/1 && git cherry-pick FETCH_HEAD`;
 
 	print STDERR "Building current version for API changesn\n";
