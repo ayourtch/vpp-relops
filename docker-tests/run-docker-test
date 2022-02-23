@@ -23,7 +23,11 @@ export VPP_CHECK_VERSION=${VPP_CHECK_VERSION:-${VPP_EXACT_VERSION:+${VPP_EXACT_V
 
 # Prompt user to confirm verification criteria
 echo "PACKAGECLOUD_REPO: ${PACKAGECLOUD_REPO}, force install (VPP_EXACT_VERSION): '${VPP_EXACT_VERSION}', VPP_CHECK_VERSION: '${VPP_CHECK_VERSION}'"
-read -p "Press enter when ready:" ENTER
+if [ -z "${UNATTENDED+set}" ]; then
+  read -p "Press enter when ready:" ENTER
+else
+  echo "Unattended test. continue without prompt"
+fi
 
 if [ "$VPP_EXACT_VERSION" = "" ]; then
   BUILD_ARG_VERSION=""
@@ -69,6 +73,8 @@ echo "-----------------------"
 echo
 if [ "$FAILED_TEST" = "false" ] ; then
   echo 'ALL TESTS PASSED!!!  :)'
+  true
 else
   echo 'One or more tests FAILED!!! :('
+  false
 fi
