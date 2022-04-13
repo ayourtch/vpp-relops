@@ -273,7 +273,10 @@ sub get_api_changes {
 	`date`;
 	sleep(30);
 	`date`;
+	print STDERR `ps -ef | grep vpp`;
+	print STDERR "Get the API changes\n";
 	$api_changes = `./build-root/install-vpp_debug-native/vpp/bin/vppctl -s /tmp/vpp-api-cli.sock show api dump file /tmp/api-table.$base_tag_branch compare`;
+	print STDERR "Obtained the changes\n";
 	print STDERR `ps -ef | grep vpp`;
 	print STDERR "Stopping VPP\n";
 	`pkill vpp`;
