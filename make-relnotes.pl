@@ -235,11 +235,13 @@ sub get_api_changes {
 	`git checkout master`;
 	`git branch -d $base_tag_branch`;
 	`git checkout -b $base_tag_branch $base_tag`;
-	`make install-dep`;
+	`make install-dep install-ext-deps`;
 	`git clean -fdx`;
+	`date`;
 	print STDERR "Building base version for API changes\n";
 	`make build >&2`;
 	`rm -f /tmp/api-table.$base_tag_branch`;
+	`date`;
 	print STDERR "Collecting the table of old APIs from running VPP\n";
 	`./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on save-api-table api-table.$base_tag_branch } unix { cli-listen /tmp/vpp-api-cli.sock } plugins { plugin dpdk_plugin.so { disable } }`;
 	if (!wait_file("/tmp/api-table.$base_tag_branch")) {
@@ -256,16 +258,21 @@ sub get_api_changes {
 
 	print STDERR "Building current version for API changesn\n";
 	`git branch -d $base_tag_branch`;
-	`make install-dep`;
+	`date`;
+	`make install-dep install-ext-deps`;
 	print STDERR "Stopping VPP\n";
 	`pkill vpp`;
 	print STDERR "Cleaning up and rebuilding VPP\n";
 	`git clean -fdx`;
+	`date`;
 	`make build >&2`;
 
 	`./build-root/install-vpp_debug-native/vpp/bin/vpp api-trace { on } unix { cli-listen /tmp/vpp-api-cli.sock } plugins { plugin dpdk_plugin.so { disable } } >&2`;
+	`date`;
 	print STDERR "Sleep for 30 sec to let VPP come up\n";
+	`date`;
 	sleep(30);
+	`date`;
 	$api_changes = `./build-root/install-vpp_debug-native/vpp/bin/vppctl -s /tmp/vpp-api-cli.sock show api dump file /tmp/api-table.$base_tag_branch compare`;
 	print STDERR `ps -ef | grep vpp`;
 	print STDERR "Stopping VPP\n";
