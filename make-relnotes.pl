@@ -232,12 +232,13 @@ sub wait_file {
 sub get_api_changes {
 	my $base_tag_branch = "$base_branch-api-baseline";
 	$base_tag_branch =~ s/\//-/g;
+	`echo base branch: $base_tag_branch >&2`;
 	`git checkout master`;
 	`git branch -d $base_tag_branch`;
 	`git checkout -b $base_tag_branch $base_tag`;
-	`make install-dep install-ext-deps`;
+	`make install-dep install-ext-deps >&2`;
 	`git clean -fdx`;
-	`date`;
+	`date >&2`;
 	print STDERR "Building base version for API changes\n";
 	`make build >&2`;
 	`rm -f /tmp/api-table.$base_tag_branch`;
@@ -252,9 +253,6 @@ sub get_api_changes {
 	print STDERR "Checking out branch $base_branch";
 
 	`git checkout $base_branch`;
-
-	print STDERR "adding the patch for the API CRC32 algorithm change detection";
-	`git fetch "https://gerrit.fd.io/r/vpp" refs/changes/59/32359/1 && git cherry-pick FETCH_HEAD`;
 
 	print STDERR "Building current version for API changesn\n";
 	`git branch -d $base_tag_branch`;
