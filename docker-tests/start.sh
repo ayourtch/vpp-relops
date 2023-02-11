@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
-mkdir /run || true
-mkdir /run/vpp || true
+mkdir -p /run
+mkdir -p /run/vpp
 /usr/bin/vpp unix { cli-listen /run/vpp/cli.sock } plugins { plugin dpdk_plugin.so { disable } } 2> /dev/null
 
 echo Waiting 10 sec for VPP to boot...
