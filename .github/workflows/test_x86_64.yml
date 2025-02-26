@@ -36,4 +36,5 @@ jobs:
           echo "Running a docker test"
           export PACKAGECLOUD_REPO=fdio/2502
           export VPP_EXACT_VERSION=25.02-release
+          export UNATTENDED=y
           ./run-docker-test 
