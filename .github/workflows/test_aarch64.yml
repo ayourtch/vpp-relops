@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: ARM CI
+name: aarch64 CI
 
 # Controls when the workflow will run
 on:
@@ -34,8 +34,7 @@ jobs:
         run: |
           cd docker-tests
           echo "Running a docker test"
-          export PACKAGECLOUD_REPO=fdio/2502
-          export VPP_EXACT_VERSION=25.02-release
           export VPP_PACKAGE_LIST=packagelists/arm-default
           export UNATTENDED=y
-          ./run-docker-test 
+          export PLATFORM=aarch64
+          ./ci-check-install.sh
