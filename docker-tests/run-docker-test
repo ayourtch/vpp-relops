@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu
+set -eux
 
 # which packagecloud repository to use
 export PACKAGECLOUD_REPO=${PACKAGECLOUD_REPO:-'fdio/release'}
