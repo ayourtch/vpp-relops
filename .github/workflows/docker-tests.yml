@@ -1,0 +1,57 @@
+name: Docker Tests (Unified)
+
+on:
+  workflow_dispatch:
+    inputs:
+      packagecloud_repo:
+        description: 'PackageCloud repository'
+        required: false
+        default: 'fdio/release'
+        type: string
+      vpp_exact_version:
+        description: 'Exact VPP version to install (leave empty for latest)'
+        required: false
+        default: ''
+        type: string
+      vpp_check_version:
+        description: 'VPP version to check in show outputs'
+        required: false
+        default: ''
+        type: string
+      vpp_package_list_x86:
+        description: 'Packagelist prefix for x86_64'
+        required: false
+        default: 'packagelists/default'
+        type: string
+      vpp_package_list_arm:
+        description: 'Packagelist prefix for aarch64'
+        required: false
+        default: 'packagelists/arm-default'
+        type: string
+
+jobs:
+  docker-test:
+    strategy:
+      matrix:
+        architecture: [x86_64, aarch64]
+        include:
+          - architecture: x86_64
+            runner: ubuntu-latest
+            package_list: ${{ inputs.vpp_package_list_x86 }}
+          - architecture: aarch64
+            runner: ubuntu-24.04-arm
+            package_list: ${{ inputs.vpp_package_list_arm }}
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run docker tests
+        run: |
+          cd docker-tests
+          [ -n "${{ inputs.packagecloud_repo }}" ] && export PACKAGECLOUD_REPO="${{ inputs.packagecloud_repo }}"
+          [ -n "${{ inputs.vpp_exact_version }}" ] && export VPP_EXACT_VERSION="${{ inputs.vpp_exact_version }}"
+          [ -n "${{ inputs.vpp_check_version }}" ] && export VPP_CHECK_VERSION="${{ inputs.vpp_check_version }}"
+          export VPP_PACKAGE_LIST="${{ matrix.package_list }}"
+          export UNATTENDED=y
+          ./run-docker-test
