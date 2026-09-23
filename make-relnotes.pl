@@ -167,6 +167,8 @@ sub print_markdown {
 
 	foreach $aFeature (@componentlist) {
 		my $component_name = $components->{$aFeature}->{'name'};
+		# a component named exactly like a section (e.g. "VNET") goes under that section's heading
+		my $is_section_root = 0;
 		if ($in_section) {
 			if (rindex($component_name, $section_prefix, 0) != 0) {
 				$in_section = 0;
@@ -181,7 +183,7 @@ sub print_markdown {
 		# the "in_section" might have been just reset, so need another branch
 		if (!$in_section)	{
 			foreach $aPrefix (keys %{$section_prefixes}) {
-				if (rindex($component_name, $aPrefix, 0) == 0) {
+				if ((rindex($component_name, $aPrefix, 0) == 0) || ($component_name eq $section_prefixes->{$aPrefix})) {
 					$in_section = 1;
 					$section_prefix = $aPrefix;
 					my $section_name = $section_prefixes->{$aPrefix};
@@ -192,16 +194,24 @@ sub print_markdown {
 			}
 		}
 		if ($in_section) {
+			if ($component_name eq $section_prefixes->{$section_prefix}) {
+				$is_section_root = 1;
+			}
 			$component_name =~ s/^$section_prefix//g;
 		}
-		$component_name = mdstring($component_name);
-		print("$indent- $component_name\n");
+		my $commit_indent = "$indent  ";
+		if ($is_section_root) {
+			$commit_indent = $indent;
+		} else {
+			$component_name = mdstring($component_name);
+			print("$indent- $component_name\n");
+		}
 		foreach $aCommit (@{$commits->{$aFeature}}) {
 			# print(Dumper($aCommit));
 			my $msg = $aCommit->{'comment_r'};
 			my $cid = $aCommit->{'commit_id'};
-			my $aOutLine = "$msg ([$cid](https://gerrit.fd.io/r/gitweb?p=vpp.git;a=commit;h=$cid))";
-			print("$indent  - $aOutLine\n");
+			my $aOutLine = "$msg ([$cid](https://github.com/fdio/vpp/commit/$cid))";
+			print("$commit_indent- $aOutLine\n");
 		}
 	}
 }
@@ -322,7 +332,7 @@ sub print_api_change_commits {
 				my $commit = shift(@parts);
 				my $message = join(" ", @parts);
 				$message =~ s/\|/\\|/g;
-				print("| [$commit](https://gerrit.fd.io/r/gitweb?p=vpp.git;a=commit;h=$commit) | $message |\n");
+				print("| [$commit](https://github.com/fdio/vpp/commit/$commit) | $message |\n");
 			}
 			print("\n");
 		} else {
@@ -351,7 +361,7 @@ sub print_feature_change_commits {
 				my $commit = shift(@parts);
 				my $message = join(" ", @parts);
 				$message =~ s/\|/\\|/g;
-				print("| [$commit](https://gerrit.fd.io/r/gitweb?p=vpp.git;a=commit;h=$commit) | $message |\n");
+				print("| [$commit](https://github.com/fdio/vpp/commit/$commit) | $message |\n");
 				my $command_output = `git diff $commit~1..$commit $file_name`;
 				print("```\n$command_output\n```\n");
 			}
@@ -455,12 +465,12 @@ __E__
 
 ## Known issues
 
-For the full list of issues please refer to fd.io [JIRA](https://jira.fd.io).
+For the full list of issues please refer to fd.io [GitHub](https://github.com/fdio/vpp/issues).
 
 ## Fixed issues
 
 For the full list of fixed issues please refer to:
-- fd.io [JIRA](https://jira.fd.io)
+- fd.io [GitHub](https://github.com/fdio/vpp/issues)
 - git [commit log](https://git.fd.io/vpp/log/?h=$base_branch)
 
 __E__
