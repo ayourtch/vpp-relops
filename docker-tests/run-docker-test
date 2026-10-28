@@ -4,13 +4,8 @@ set -eux
 # which packagecloud repository to use
 export PACKAGECLOUD_REPO=${PACKAGECLOUD_REPO:-'fdio/release'}
 
-# the version to pin down during the install, or empty
-if [ -z "${VPP_CHECK_VERSION+set}" ]; then
-  VPP_EXACT_VERSION=${VPP_EXACT_VERSION:-"19.01.3-release"}
-else
-  VPP_EXACT_VERSION=""
-fi
-export VPP_EXACT_VERSION
+# the version to pin down during the install, or empty (= latest)
+export VPP_EXACT_VERSION=${VPP_EXACT_VERSION:-}
 
 if [ -z "${VPP_PACKAGE_LIST+set}" ]; then
   VPP_PACKAGE_LIST=${VPP_PACKAGE_LIST:-"packagelists/default"}
